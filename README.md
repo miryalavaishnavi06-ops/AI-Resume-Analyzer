@@ -2,6 +2,10 @@
 
 An AI-powered resume analysis dashboard built with Python, Streamlit, and Google Gemini.
 
+## Live Demo
+
+https://ai-resume-analyzer-cbsfh7qj44fxq7ssqrleph.streamlit.app/
+
 ## Features
 
 - PDF resume parsing
@@ -14,6 +18,16 @@ An AI-powered resume analysis dashboard built with Python, Streamlit, and Google
 - Gemini-powered resume feedback
 - Skill coverage charts
 - Downloadable AI analysis report
+
+## Tech Stack
+
+- Python
+- Streamlit
+- Google Gemini API
+- PDFPlumber
+- Pandas
+- Matplotlib
+- python-dotenv
 
 ## Architecture
 
@@ -107,6 +121,5 @@ GEMINI_API_KEY = "your_real_gemini_api_key"
 
 - PDF report generation
 - Multiple resume comparison
-- Resume and job description matching
 - Skill gap roadmap
 - Conversational AI career assistant using RAG and embeddings
