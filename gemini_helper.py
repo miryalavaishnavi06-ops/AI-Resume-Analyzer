@@ -1,10 +1,11 @@
 import os
+from pathlib import Path
 
 import google.generativeai as genai
 from dotenv import load_dotenv
 
 
-load_dotenv()
+load_dotenv(Path(__file__).with_name(".env"))
 
 
 PREFERRED_MODELS = [
@@ -62,7 +63,7 @@ def get_api_key():
         return None
 
 
-def get_resume_feedback(resume_text):
+def get_resume_feedback(resume_text, job_description=""):
     try:
         api_key = get_api_key()
 
@@ -72,20 +73,39 @@ def get_resume_feedback(resume_text):
                 "in your .env file or Streamlit Cloud secrets before running the app."
             )
 
-        prompt = f"""
-        You are an expert ATS Resume Reviewer.
+        if job_description.strip():
+            prompt = f"""
+            You are an expert ATS Resume Reviewer.
 
-        Analyze the following resume and provide:
-        1. ATS Score out of 100
-        2. Top 5 suitable job roles
-        3. Missing technical skills
-        4. Strengths
-        5. Weaknesses
-        6. Suggestions to improve the resume
+            Compare the resume with the target job description and provide:
+            1. Job match score out of 100
+            2. Matched requirements
+            3. Missing skills or experience
+            4. Resume strengths for this job
+            5. Resume weaknesses for this job
+            6. Specific suggestions to tailor the resume for this job
 
-        Resume:
-        {resume_text}
-        """
+            Resume:
+            {resume_text}
+
+            Target Job Description:
+            {job_description}
+            """
+        else:
+            prompt = f"""
+            You are an expert ATS Resume Reviewer.
+
+            Analyze the following resume and provide:
+            1. ATS Score out of 100
+            2. Top 5 suitable job roles
+            3. Missing technical or professional skills
+            4. Strengths
+            5. Weaknesses
+            6. Suggestions to improve the resume
+
+            Resume:
+            {resume_text}
+            """
 
         genai.configure(api_key=api_key)
         errors = []
