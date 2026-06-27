@@ -9,9 +9,10 @@ import matplotlib.pyplot as plt
 import streamlit as st
 
 from ats_score import calculate_ats_score
-from gemini_helper import get_resume_feedback
+from gemini_helper import extract_resume_text_with_gemini, get_resume_feedback
 from job_matcher import match_resume_to_job
 from pdf_parser import extract_text_from_pdf
+from pdf_report import build_pdf_report
 from recommendation import recommend_roles
 from skills import extract_skills
 
@@ -128,9 +129,17 @@ else:
 
     if len(text.strip()) < 100:
         st.warning(
-            "Only a small amount of text was extracted from this PDF. If this is a scanned "
-            "or image-based resume, convert it to a text-based PDF for better analysis."
+            "This looks like a scanned or image-based resume. Trying Gemini text extraction..."
         )
+        with st.spinner("Reading scanned PDF with Gemini..."):
+            gemini_text = extract_resume_text_with_gemini(uploaded_file)
+
+        if gemini_text.startswith("Error:"):
+            st.error(gemini_text)
+            st.stop()
+
+        text = gemini_text
+        st.success("Scanned resume text extracted successfully.")
 
     skills = extract_skills(text)
     general_score, general_missing_skills = calculate_ats_score(skills)
@@ -269,8 +278,27 @@ else:
                 job_match,
                 feedback,
             )
+            try:
+                pdf_report = build_pdf_report(
+                    score_label,
+                    score,
+                    skills,
+                    general_missing_skills,
+                    recommended_roles,
+                    job_match,
+                    feedback,
+                )
+                st.download_button(
+                    label="Download PDF Report",
+                    data=pdf_report,
+                    file_name="Resume_Analysis_Report.pdf",
+                    mime="application/pdf",
+                )
+            except Exception as error:
+                st.warning(f"PDF report could not be created: {error}")
+
             st.download_button(
-                label="Download AI Report",
+                label="Download Text Report",
                 data=report,
                 file_name="resume_analysis.txt",
                 mime="text/plain",

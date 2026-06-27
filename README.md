@@ -17,7 +17,7 @@ https://ai-resume-analyzer-cbsfh7qj44fxq7ssqrleph.streamlit.app/
 - Matched and missing JD skills
 - Gemini-powered resume feedback
 - Skill coverage charts
-- Downloadable AI analysis report
+- Downloadable PDF and text analysis reports
 
 ## Tech Stack
 
@@ -28,6 +28,7 @@ https://ai-resume-analyzer-cbsfh7qj44fxq7ssqrleph.streamlit.app/
 - Pandas
 - Matplotlib
 - python-dotenv
+- ReportLab
 
 ## Architecture
 
@@ -69,6 +70,7 @@ AI_Resume_Analyzer/
 |-- ats_score.py
 |-- recommendation.py
 |-- job_matcher.py
+|-- pdf_report.py
 |-- gemini_helper.py
 |-- requirements.txt
 |-- .env.example
@@ -115,11 +117,10 @@ GEMINI_API_KEY = "your_real_gemini_api_key"
 - Developed an AI-powered resume analysis system using Python, Streamlit, and Google Gemini API.
 - Implemented PDF parsing, skill extraction, ATS score evaluation, and job role recommendation features.
 - Integrated Gemini AI to provide intelligent resume feedback, identify skill gaps, and suggest improvements.
-- Designed an interactive dashboard to visualize resume insights, compare resumes against job descriptions, and generate personalized career recommendations.
+- Designed an interactive dashboard to visualize resume insights, compare resumes against job descriptions, and generate downloadable analysis reports.
 
 ## Future Enhancements
 
-- PDF report generation
 - Multiple resume comparison
 - Skill gap roadmap
 - Conversational AI career assistant using RAG and embeddings

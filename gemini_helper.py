@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+import tempfile
+import time
 
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -124,3 +126,55 @@ def get_resume_feedback(resume_text, job_description=""):
         )
     except Exception as exc:
         return f"Error: {exc}"
+
+
+def extract_resume_text_with_gemini(uploaded_file):
+    try:
+        api_key = get_api_key()
+
+        if not api_key:
+            return (
+                "Error: GEMINI_API_KEY is not set. Add it to your .env file or "
+                "Streamlit Cloud secrets to read scanned PDFs."
+            )
+
+        genai.configure(api_key=api_key)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            temp_file.write(uploaded_file.getvalue())
+            temp_path = temp_file.name
+
+        try:
+            gemini_file = genai.upload_file(temp_path, mime_type="application/pdf")
+
+            while getattr(gemini_file, "state", None) and gemini_file.state.name == "PROCESSING":
+                time.sleep(1)
+                gemini_file = genai.get_file(gemini_file.name)
+
+            if getattr(gemini_file, "state", None) and gemini_file.state.name == "FAILED":
+                return "Error: Gemini could not process this PDF."
+
+            prompt = """
+            Extract the readable resume text from this PDF.
+            Preserve section headings, skills, education, experience, projects, and contact details.
+            Return only the extracted resume text.
+            """
+
+            errors = []
+
+            for model_name in get_available_model_names():
+                try:
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content([gemini_file, prompt])
+                    return getattr(response, "text", "") or "Error: Gemini returned no extracted text."
+                except Exception as exc:
+                    errors.append(f"{model_name}: {exc}")
+
+            return "Error: Gemini PDF extraction failed for all available models: " + " | ".join(errors)
+        finally:
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+    except Exception as exc:
+        return f"Error: Gemini PDF text extraction failed: {exc}"
